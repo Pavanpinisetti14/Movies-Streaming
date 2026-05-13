@@ -99,10 +99,27 @@ function Header({query, setQuery, searchMovies, year, setYear}) {
             <nav className="sticky top-0 z-50 bg-[#0A0C10]/95 backdrop-blur-md border-b border-[#2A2F36]">
                 <div className="container mx-auto px-4 py-4 flex items-center justify-between">
                     
-                    {/* Logo */}
-                    <p className="text-2xl sm:text-3xl md:text-4xl font-bold text-red-600 tracking-tight">
-                        MovieFlex
-                    </p>
+                    <div className="flex items-center gap-2">
+                        {/* SVG Icon */}
+                        <svg width="36" height="36" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-8 sm:w-10">
+                            <rect width="512" height="512" rx="96" fill="#E50914"/>
+                            <rect x="80" y="96" width="40" height="320" rx="8" fill="white"/>
+                            <circle cx="100" cy="160" r="8" fill="#E50914"/>
+                            <circle cx="100" cy="240" r="8" fill="#E50914"/>
+                            <circle cx="100" cy="320" r="8" fill="#E50914"/>
+                            <circle cx="100" cy="400" r="8" fill="#E50914"/>
+                            <rect x="392" y="96" width="40" height="320" rx="8" fill="white"/>
+                            <circle cx="412" cy="160" r="8" fill="#E50914"/>
+                            <circle cx="412" cy="240" r="8" fill="#E50914"/>
+                            <circle cx="412" cy="320" r="8" fill="#E50914"/>
+                            <circle cx="412" cy="400" r="8" fill="#E50914"/>
+                            <polygon points="196,160 196,352 360,256" fill="white"/>
+                        </svg>
+                        
+                        <p className="text-2xl sm:text-3xl md:text-4xl font-bold text-red-600 tracking-tight">
+                            MovieFlex
+                        </p>
+                    </div>
 
                     {/* Desktop Navigation */}
                     <div className="hidden md:flex items-center gap-8">
@@ -172,7 +189,7 @@ function Header({query, setQuery, searchMovies, year, setYear}) {
                         <div className="flex flex-col sm:flex-row gap-3">
                             <input
                                 type="text"
-                                placeholder="Enter Movie Name..."
+                                placeholder="Enter Exact Movie Name..."
                                 value={query}
                                 onChange={(e) => setQuery(e.target.value)}
                                 className="flex-1 px-5 py-3 bg-[#1E242C] border border-[#2A2F36] rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-red-600 transition-colors"
@@ -191,7 +208,7 @@ function Header({query, setQuery, searchMovies, year, setYear}) {
                                 onClick={searchMovies}
                                 className="flex-1 bg-red-600 hover:bg-red-700 text-white font-semibold py-3 rounded-xl transition-colors duration-200"
                             >
-                                🔍 Search
+                                 Search
                             </button>
                             <button
                                 onClick={() => setSearchHide(false)}

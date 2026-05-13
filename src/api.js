@@ -1,93 +1,84 @@
-
-
 export const fetchMovies = {
-    byQuery : ({query}) => fetchMoviesByQuery({query}),
-    latestMovies : () => fetchLatestMovies(),
-    suggestedMovies: ({id}) => fetchSuggestedMovies({id}),
+    byQuery: ({ query, year }) => fetchMoviesByQuery({ query, year }),
+    latestMovies: () => fetchLatestMovies(),
+    suggestedMovies: ({ id }) => fetchSuggestedMovies({ id }),
 }
 
-async function fetchLatestMovies(){
+async function fetchLatestMovies() {
     const response = await fetch(
         `https://api.themoviedb.org/3/movie/now_playing?api_key=e14969396fc4891ca7b01a372713c8d6`
     );
     const data = await response.json();
     return data.results || [];
 }
-async function fetchMoviesByQuery ({query}){
 
-    const moviesData1 = await fetchMoviesByNameOne({query});
-    const moviesData2 = await fetchMovieByNameTwo({query});
-    // console.log("Movies Data 1 : ",moviesData1);
-    // console.log("Movies Data 2 : ",moviesData2);
-    // console.log("Movies Data 3 : ",moviesData3);    
-    const mergedData = [
-        ...moviesData1,
-        ...moviesData2,
-    ];
-    // console.log("Merged dat ",mergedData);
+// Main search function that merges two APIs and filters by year
+async function fetchMoviesByQuery({ query, year }) {
+    const moviesData1 = await fetchMoviesByNameOne({ query, year });
+    const moviesData2 = await fetchMovieByNameTwo({ query });
+
+    let mergedData = [...moviesData1, ...moviesData2];
+
+    // If year is provided, filter both results by release year
+    if (year && year.trim()) {
+        const targetYear = parseInt(year);
+        mergedData = mergedData.filter(movie => {
+            // TMDb uses 'release_date', flixer.su may use 'release_date' or 'first_air_date'
+            const releaseDate = movie.release_date || movie.first_air_date;
+            if (releaseDate) {
+                const movieYear = new Date(releaseDate).getFullYear();
+                return movieYear === targetYear;
+            }
+            return false;
+        });
+    }
+
+    // Remove duplicates by movie id
     const uniqueMovies = Array.from(
-        new Map(
-            mergedData.map(movie => [
-                movie.id, movie 
-            ])
-        ).values()
+        new Map(mergedData.map(movie => [movie.id, movie])).values()
     );
-    // console.log("Unique Movies : ",uniqueMovies);
     return uniqueMovies;
 }
 
-async function fetchMoviesByNameOne({query}){
-
-
+// First API – TMDb (supports year directly)
+async function fetchMoviesByNameOne({ query, year }) {
     try {
-        
-        const response = await fetch(
-        `https://api.themoviedb.org/3/search/movie?api_key=e14969396fc4891ca7b01a372713c8d6&query=${query.replace(" ","%20")}`
-      );
-
-      const data = await response.json();
-      
-      return data.results || [];
-
+        let url = `https://api.themoviedb.org/3/search/movie?api_key=e14969396fc4891ca7b01a372713c8d6&query=${encodeURIComponent(query)}`;
+        if (year && year.trim()) {
+            url += `&primary_release_year=${year}`;
+        }
+        const response = await fetch(url);
+        const data = await response.json();
+        return data.results || [];
     } catch (error) {
-        console.log("Error in Fetch One : ",error);
-        const err = ["Fetching Movies Failed"];
-        return err;
+        console.log("Error in Fetch One : ", error);
+        return [];
     }
 }
 
-async function fetchMovieByNameTwo({query}){
-
+// Second API – flixer.su (no year param, so we filter later)
+async function fetchMovieByNameTwo({ query }) {
     try {
         const response = await fetch(
-            `https://plsdontscrapemelove.flixer.su/api/tmdb/search/multi?language=en-US&query=${query.replace(" ","%20")}&page=1`
+            `https://plsdontscrapemelove.flixer.su/api/tmdb/search/multi?language=en-US&query=${encodeURIComponent(query)}&page=1`
         );
         const data = await response.json();
         return data.results || [];
-
-
-
     } catch (error) {
-        console.log("Error in Fetch Two : ",error);
-        const err = ["Fetching Movies Failed"];
-        return err;
+        console.log("Error in Fetch Two : ", error);
+        return [];
     }
 }
 
-async function fetchSuggestedMovies({id}){
-
-
+async function fetchSuggestedMovies({ id }) {
     try {
         const response = await fetch(
             `https://api.themoviedb.org/3/movie/${id}/recommendations?api_key=e14969396fc4891ca7b01a372713c8d6`
         );
         const data = await response.json();
-        return data.results || [];  
+        return data.results || [];
     } catch (error) {
-        console.log("Error in Fetch Suggested Movies : ",error);
-        const err = ["Fetching Suggested Movies Failed"];
-        return err;
+        console.log("Error in Fetch Suggested Movies : ", error);
+        return [];
     }
 }
-
-

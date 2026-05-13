@@ -108,6 +108,27 @@ function App() {
     const [movies, setMovies] = useState([]);
     const [loading, setLoading] = useState(false);
     const [latestMovies, setLatestMovies] = useState([]);
+    // console.log("Year : ",year);
+
+    useEffect(() => {
+        if (location.pathname === "/") {
+        // Push a dummy state so that "back" stays on the same page
+        window.history.pushState(null, "", window.location.href);
+        
+        const handlePopState = (event) => {
+            // When back is pressed, push again to stay on home
+            window.history.pushState(null, "", window.location.href);
+        };
+        
+        window.addEventListener("popstate", handlePopState);
+        
+        return () => {
+            window.removeEventListener("popstate", handlePopState);
+        };
+        }
+    }, [location.pathname]);
+
+
 
     const searchMovies = async () => {
 
@@ -120,7 +141,7 @@ function App() {
             setLoading(true);
 
             const result =
-            await fetchMovies.byQuery({ query });
+            await fetchMovies.byQuery({ query,year });
             // setCurrentPage(1);
             setMovies(result);
 
