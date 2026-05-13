@@ -2,6 +2,11 @@ export const fetchMovies = {
     byQuery: ({ query, year }) => fetchMoviesByQuery({ query, year }),
     latestMovies: () => fetchLatestMovies(),
     suggestedMovies: ({ id }) => fetchSuggestedMovies({ id }),
+    getTopRated: () => fetchTopRated(),
+    getNowPlaying: () => fetchNowPlaying(),
+    getPopularMovies: () => fetchPopularMovies(),
+    getTrending: () => fetchTrending(),
+    getPopularTV: () => fetchPopularTV(), 
 }
 
 async function fetchLatestMovies() {
@@ -79,6 +84,72 @@ async function fetchSuggestedMovies({ id }) {
         return data.results || [];
     } catch (error) {
         console.log("Error in Fetch Suggested Movies : ", error);
+        return [];
+    }
+}
+
+async function fetchTopRated() {
+    try {
+        const response = await fetch(
+            `https://api.themoviedb.org/3/movie/top_rated?api_key=e14969396fc4891ca7b01a372713c8d6`
+        );
+        const data = await response.json();
+        return data.results || [];
+    } catch (error) {
+        console.log("Error fetching top-rated movies:", error);
+        return [];
+    }
+}
+
+async function fetchNowPlaying() {
+    try {
+        const response = await fetch(
+            `https://api.themoviedb.org/3/movie/now_playing?api_key=e14969396fc4891ca7b01a372713c8d6`
+        );
+        const data = await response.json();
+        return data.results || [];
+    } catch (error) {
+        console.log("Error fetching now-playing movies:", error);
+        return [];
+    }
+}
+
+async function fetchPopularMovies() {
+    try {
+        const response = await fetch(
+            `https://api.themoviedb.org/3/movie/popular?api_key=e14969396fc4891ca7b01a372713c8d6`
+        );
+        const data = await response.json();
+        return data.results || [];
+    } catch (error) {
+        console.log("Error fetching popular movies:", error);
+        return [];
+    }
+}
+
+async function fetchTrending() {
+    try {
+        const response = await fetch(
+            `https://api.themoviedb.org/3/trending/movie/week?api_key=e14969396fc4891ca7b01a372713c8d6`
+        );
+        const data = await response.json();
+        return data.results || [];
+    } catch (error) {
+        console.log("Error fetching trending movies:", error);
+        return [];
+    }
+}
+
+// Optional – popular TV shows
+async function fetchPopularTV() {
+    try {
+        const response = await fetch(
+            `https://api.themoviedb.org/3/tv/popular?api_key=e14969396fc4891ca7b01a372713c8d6`
+        );
+        const data = await response.json();
+        return data.results || [];
+    } catch (error) {
+        console.log("Error fetching popular TV shows:", error);
         return [];
     }
 }
