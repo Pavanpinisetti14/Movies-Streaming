@@ -1,3 +1,5 @@
+//more video players https://vidsrcme.ru/api/
+
 export const fetchMovies = {
     byQuery: ({ query, year }) => fetchMoviesByQuery({ query, year }),
     latestMovies: () => fetchLatestMovies(),
@@ -7,6 +9,7 @@ export const fetchMovies = {
     getPopularMovies: () => fetchPopularMovies(),
     getTrending: () => fetchTrending(),
     getPopularTV: () => fetchPopularTV(), 
+    getImdbIdFromTmdb: ({ tmdbId }) => fetchImdbIdFromTmdb({ tmdbId }),
 }
 
 async function fetchLatestMovies() {
@@ -151,5 +154,22 @@ async function fetchPopularTV() {
     } catch (error) {
         console.log("Error fetching popular TV shows:", error);
         return [];
+    }
+}
+
+// New function to get the IMDB ID from a TMDb ID
+async function fetchImdbIdFromTmdb({ tmdbId }) {
+    try {
+        // Call the TMDb API to get external IDs for the movie
+        const response = await fetch(
+            `https://api.themoviedb.org/3/movie/${tmdbId}/external_ids?api_key=e14969396fc4891ca7b01a372713c8d6`
+        );
+        const data = await response.json();
+        
+        // The response includes an 'imdb_id' field (e.g., "tt1375666")
+        return data.imdb_id;
+    } catch (error) {
+        console.log("Error fetching IMDB ID:", error);
+        return null;
     }
 }

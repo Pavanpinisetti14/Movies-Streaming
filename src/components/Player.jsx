@@ -12,12 +12,26 @@ function Player() {
     const [credits, setCredits] = useState({ cast: [], crew: [] });
     const [loading, setLoading] = useState(true);
     const [creditsLoading, setCreditsLoading] = useState(true);
+    const [activeServer, setActiveServer] = useState("serverOne");
+    const [error, setError] = useState(false);
+    const [imdbId, setImdbId] = useState(null);
+
+
+    useEffect(() => {
+        const fetchId = async () => {
+            const id = await fetchMovies.getImdbIdFromTmdb({ tmdbId: movies.movie.id });
+            setImdbId(id);
+            console.log("IMDB ID : ",imdbId)
+        };
+        fetchId();
+    }, [movies.movie.id]);
+
 
     const fetchSuggestedMovies = async () => {
         const data = await fetchMovies.suggestedMovies({ id: movies.movie.id });
         setSuggestedMovies(data);
     };
-    console.log("Movie Is : ",movies.movie.id)
+
     const fetchMovieCredits = async () => {
         try {
             const response = await fetch(
@@ -35,16 +49,54 @@ function Player() {
     useEffect(() => {
         fetchSuggestedMovies();
         fetchMovieCredits();
-    },[credits]);
+    }, []);
+
+    // Timeout to hide loading if iframe never triggers onLoad
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            if (loading) {
+                setLoading(false);
+                if (!error) setError(true);
+            }
+        }, 10000);
+        return () => clearTimeout(timer);
+    }, [loading, error]);
 
     const getDirector = () => {
         const director = credits.crew?.find(member => member.job === "Director");
         return director ? director.name : "Unknown";
     };
 
+    const switchServer = (server) => {
+        setActiveServer(server);
+        setLoading(true);
+        setError(false);
+    };
+
+    const handleIframeError = () => {
+        console.log(`Iframe error on ${activeServer}`);
+        setLoading(false);
+        setError(true);
+    };
+
+    // Define three working server URLs (all iframe-friendly)
+    const getServerUrl = () => {
+        const movieId = movies.movie.id;
+        switch (activeServer) {
+            case "serverOne":
+                return `https://www.vidking.net/embed/movie/${movieId}`;
+            case "serverTwo":
+                return `https://primesrc.me/embed/movie?tmdb=${movieId}`;
+            case "serverThree":
+                // const imdbId = await fetchMovies.getImdbIdFromTmdb(movies.movie.id); // You'll need this function
+                return `https://vsembed.ru/embed/movie/${imdbId}`;
+            default:
+                return `https://www.vidking.net/embed/movie/${movieId}`;
+        }
+    };
+    console.log("Movies ID : ",movies.movie.id);
     return (
         <>
-            {/* Navigation Bar */}
             <nav className="sticky top-0 z-50 bg-[#0A0C10]/95 backdrop-blur-md border-b border-[#2A2F36] px-4 py-4">
                 <div className="container mx-auto flex items-center justify-between">
                     <div className="flex items-center gap-2">
@@ -75,10 +127,9 @@ function Player() {
 
             <main className="bg-gradient-to-b from-[#0A0C10] to-[#14181F] min-h-screen">
                 <div className="container mx-auto px-4 py-8">
-                    {/* Two column layout */}
                     <div className="flex flex-col lg:flex-row gap-8">
                         
-                        {/* LEFT COLUMN: Video Player (top) + Credits (bottom) */}
+                        {/* LEFT COLUMN */}
                         <div className="flex-1 flex flex-col gap-6">
                             {/* Video Player */}
                             <div className="relative rounded-xl overflow-hidden bg-black shadow-2xl">
@@ -88,15 +139,69 @@ function Player() {
                                         <p className="text-white mt-4 text-sm">Loading player...</p>
                                     </div>
                                 )}
-                                <iframe
-                                    key={movies.movie.id}
-                                    className="w-full aspect-video rounded-xl"
-                                    src={`https://www.vidking.net/embed/movie/${movies.movie.id}`}
-                                    allowFullScreen
-                                    onLoad={() => setLoading(false)}
-                                ></iframe>
+                                {error ? (
+                                    <div className="w-full aspect-video flex flex-col items-center justify-center bg-[#1A1F2A] text-white">
+                                        <p className="text-red-500 text-lg mb-4">⛔ Playback Error</p>
+                                        <p className="text-gray-400 text-sm mb-6">Failed to load video from this server.</p>
+                                        <button
+                                            onClick={() => window.location.reload()}
+                                            className="bg-red-600 hover:bg-red-700 px-6 py-2 rounded-lg"
+                                        >
+                                            Retry Page
+                                        </button>
+                                    </div>
+                                ) : (
+                                    <iframe
+                                        key={activeServer} // Forces iframe to reload when server changes
+                                        className="w-full aspect-video rounded-xl"
+                                        src={getServerUrl()}
+                                        allowFullScreen
+                                        onLoad={() => {
+                                            console.log("Iframe loaded");
+                                            setLoading(false);
+                                            setError(false);
+                                        }}
+                                        onError={handleIframeError}
+                                        title="Movie Player"
+                                    />
+                                )}
                             </div>
-                            {/* Cast Credits Section – Grid 5 columns */}
+
+                            {/* Three Server Selection Buttons */}
+                            <div className="flex flex-wrap justify-center gap-3">
+                                <button
+                                    className={`px-4 py-2 rounded-lg font-semibold transition-colors ${
+                                        activeServer === "serverOne"
+                                            ? "bg-red-700 text-white"
+                                            : "bg-[#2A2F36] text-gray-300 hover:bg-red-600"
+                                    }`}
+                                    onClick={() => switchServer("serverOne")}
+                                >
+                                    Server 1 (VidKing)
+                                </button>
+                                <button
+                                    className={`px-4 py-2 rounded-lg font-semibold transition-colors ${
+                                        activeServer === "serverTwo"
+                                            ? "bg-red-700 text-white"
+                                            : "bg-[#2A2F36] text-gray-300 hover:bg-red-600"
+                                    }`}
+                                    onClick={() => switchServer("serverTwo")}
+                                >
+                                    Server 2 (VidSrc.xyz)
+                                </button>
+                                <button
+                                    className={`px-4 py-2 rounded-lg font-semibold transition-colors ${
+                                        activeServer === "serverThree"
+                                            ? "bg-red-700 text-white"
+                                            : "bg-[#2A2F36] text-gray-300 hover:bg-red-600"
+                                    }`}
+                                    onClick={() => switchServer("serverThree")}
+                                >
+                                    Server 3 (VidSrc.to)
+                                </button>
+                            </div>
+
+                            {/* Cast Credits Section (unchanged) */}
                             <div className="bg-[#1A1F2A] rounded-xl p-5 shadow-lg">
                                 <h3 className="text-red-500 font-semibold text-lg mb-4 flex items-center gap-2">
                                     🎭 Top Cast
@@ -125,8 +230,6 @@ function Player() {
                                     </div>
                                 )}
                             </div>
-                            
-                            
                         </div>
 
                         {/* RIGHT COLUMN: Movie Details */}
