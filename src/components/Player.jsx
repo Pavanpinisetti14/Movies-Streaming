@@ -177,7 +177,7 @@ function Player() {
                                     }`}
                                     onClick={() => switchServer("serverOne")}
                                 >
-                                    Server 1 (VidKing)
+                                    Server 1
                                 </button>
                                 <button
                                     className={`px-4 py-2 rounded-lg font-semibold transition-colors ${
@@ -187,7 +187,7 @@ function Player() {
                                     }`}
                                     onClick={() => switchServer("serverTwo")}
                                 >
-                                    Server 2 (VidSrc.xyz)
+                                    Server 2
                                 </button>
                                 <button
                                     className={`px-4 py-2 rounded-lg font-semibold transition-colors ${
@@ -197,7 +197,7 @@ function Player() {
                                     }`}
                                     onClick={() => switchServer("serverThree")}
                                 >
-                                    Server 3 (VidSrc.to)
+                                    Server 3
                                 </button>
                             </div>
 
