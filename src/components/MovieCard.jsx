@@ -1,10 +1,11 @@
 import { useNavigate } from "react-router-dom";
 
-function MovieCard({ movie }) {
+function MovieCard({ movie, type }) {
     const navigate = useNavigate();
 
     const moviePlayer = () => {
-        navigate("/Player", { state: { movie } });
+        // console.log("Type : ",type);
+        type === "tv" ? navigate("/TvShowPayer",{state:{movie}}) : navigate("/Player", { state: { movie }});
     };
 
     return (
@@ -30,6 +31,24 @@ function MovieCard({ movie }) {
                         {movie.release_date.split("-")[0]}
                     </p>
                 )}
+                {
+                    type === "movies"
+                    ?
+                    // <p>
+                    <p className="text-gray-400 text-xs">Type : Movies</p>
+                    // </p>
+                    :
+                    // {
+                    //     {movie.media_type === "tv"
+                    //         ?
+                    //         <p className="text-gray-400 text-xs">Type : {movie.media_type}</p>
+                    //         :
+                    //         <p className="text-gray-400 text-xs">Type : {movie.media_type}</p>
+                    //     }
+                    // }
+                    <p className="text-gray-400 text-xs" >Type: {movie.media_type === "tv" ? "TV Show " : "Movie"}</p>
+                }
+
             </div>
         </div>
     );

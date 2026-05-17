@@ -19,7 +19,10 @@ function App() {
     const [nowPlaying, setNowPlaying] = useState([]);
     const [popularMovies, setPopularMovies] = useState([]);
     const [trending, setTrending] = useState([]);
+    const [trendingTvShows , setTrendingTvShows] = useState([])
+    const [latestMoviesTvShows, setLatestMoviesTvShows] = useState([]);
     const [loadingCategories, setLoadingCategories] = useState(true);
+    const [mergedData, setMergedData] =useState([]);
     // console.log("Year : ",year);
 
 
@@ -27,17 +30,24 @@ function App() {
     useEffect(() => {
         const fetchAllCategories = async () => {
             setLoadingCategories(true);
-            const [top, now, popular, trend] = await Promise.all([
+            const [top, now, popular, trend,tvShows] = await Promise.all([
                 fetchMovies.getTopRated(),
                 fetchMovies.getNowPlaying(),
                 fetchMovies.getPopularMovies(),
                 fetchMovies.getTrending(),
+                fetchMovies.getTrendingTvShows(),
             ]);
             setTopRated(top);
             setNowPlaying(now);
             setPopularMovies(popular);
             setTrending(trend);
+            setTrendingTvShows(tvShows)
             setLoadingCategories(false);
+
+            let merged =[...trend, ...tvShows]
+            let shuffled = merged.sort(() => Math.random() - 0.5);
+            setMergedData(shuffled);
+            // console.log("Populat Movies ",tvShows);
         };
         fetchAllCategories();
         fetchLatestMovies(); // fetch now-playing again? Keep if you want "Latest Releases" row
@@ -128,11 +138,14 @@ function App() {
         ) : (
             // Homepage mode – multiple rows
             <>
-                <Row title="🔥 Trending Now" movies={trending} isLoading={loadingCategories} />
-                <Row title="⭐ Top Rated Movies" movies={topRated} isLoading={loadingCategories} />
-                <Row title="🎬 Now Playing" movies={nowPlaying} isLoading={loadingCategories} />
-                <Row title="📈 Popular Movies" movies={popularMovies} isLoading={loadingCategories} />
-                <Row title="🆕 Latest Releases" movies={latestMovies} isLoading={loadingCategories} />
+                <Row title="🆕 Latest Movies and TV Shows" movies={mergedData} isLoading={loadingCategories} type={"ms"} />
+                <Row title="🆕 Latest Releases" movies={latestMovies} isLoading={loadingCategories} type={"Movies"} />
+                <Row title="Latest Tv Shows" movies={trendingTvShows} isLoading={loadingCategories} type={"tv"} />
+                <Row title="🔥 Trending Now" movies={trending} isLoading={loadingCategories} type={"movies"} />
+                <Row title="⭐ Top Rated Movies" movies={topRated} isLoading={loadingCategories} type={"movies"} />
+                <Row title="🎬 Now Playing" movies={nowPlaying} isLoading={loadingCategories} type={"movies"} />
+                <Row title="📈 Popular Movies" movies={popularMovies} isLoading={loadingCategories} type={"movies"} />
+                
             </>
         )}
     </div>

@@ -1,134 +1,3 @@
-// import React, { useState } from "react";
-// import { useNavigate } from "react-router-dom";
-
-// function Data({movies,loading,displayQuery}) {
-
-//   // console.log("Movies Data : ",movies);
-//   const [currentPage, setCurrentPage] = useState(1);
-
-//   const movieperpage = 12;
-//   const lastindex = currentPage * movieperpage;
-
-//   const firstindex = lastindex - movieperpage;
-//   const currentmovies = movies.slice(firstindex, lastindex);
-//   // console.log("Current Movies : ",currentmovies);
-//   const navigate = useNavigate();
-
-//   const moviePlayer = (movie) => {
-//     navigate("/Player", {state : {movie}});
-//   }
-    
-//    return (
-//   <>
-
-//     {
-//       movies.length > 0 ? (
-
-//         <>
-//            {
-//               displayQuery ? (
-                
-//                 <span className="text-lg font-semibold m-3 p-3">
-//                  <b>{displayQuery}</b>
-//                   {/* <br />
-//                   Found {movies.length} movies */}
-//                 </span>
-
-//               ) : (
-
-//                 <span className="text-lg font-semibold mb-3">
-//                   Latest Movies From Our Side
-//                 </span>
-
-//               )
-//             }
-//             <br></br><br></br>
-//           <div className="grid grid-cols-[repeat(auto-fit,minmax(300px,1fr))] gap-5">
-           
-//             {
-//               currentmovies.map((movie, index) => (
-
-//                 <div
-//                   key={index}
-//                   className="bg-white p-5 rounded-xl shadow-md"
-//                 >
-
-//                   <img
-//                     className="w-full h-[350px] object-cover rounded-lg"
-//                     src={
-//                       movie.poster_path
-//                       ? `https://image.tmdb.org/t/p/w500${movie.poster_path}`
-//                       : "https://placehold.co/500x750?text=No+Image"
-//                     }
-//                     alt={movie.title}
-//                   />
-
-//                   <h2 className="text-black text-xl font-bold mt-3">
-//                     {movie.title}
-//                   </h2>
-
-//                   {
-//                     movie.release_date &&
-//                     <p className="mt-2 text-black">
-//                       <b>Relase Date :</b> {movie.release_date}
-//                     </p>
-//                   }
-
-//                   <button 
-//                     onClick={() => moviePlayer(movie)}
-//                     className="inline-block mt-3 text-blue-500 hover:underline"
-//                   >
-//                     Watch Movie
-//                   </button>
-
-//                 </div>
-//               ))
-//             }
-
-//           </div>
-
-//           {/* Pagination */}
-
-//           <div className="flex justify-center items-center gap-5 mt-10">
-
-//             <button
-//               onClick={() => setCurrentPage(currentPage - 1)}
-//               disabled={currentPage === 1}
-//               className="bg-blue-500 text-white px-5 py-2 rounded-lg disabled:bg-gray-400"
-//             >
-//               Previous
-//             </button>
-
-//             <span className="text-lg font-semibold">
-//               Page {currentPage}
-//             </span>
-
-//             <button
-//               onClick={() => setCurrentPage(currentPage + 1)}
-//               disabled={lastindex >= movies.length}
-//               className="bg-blue-500 text-white px-5 py-2 rounded-lg disabled:bg-gray-400"
-//             >
-//               Next
-//             </button>
-
-//           </div>
-
-//         </>
-
-//       ) : (
-
-//         !loading && (
-//           <p>No movies found</p>
-//         )
-
-//       )
-//     }
-
-//   </>
-// );
-// }
-// export default Data;
-
 
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -146,8 +15,11 @@ function Data({movies,loading,displayQuery}) {
   const navigate = useNavigate();
 
   const moviePlayer = (movie) => {
-    navigate("/Player", {state : {movie}});
+     movie.media_type === "tv" ? navigate("TvShowPayer",{state:{movie}})
+    :navigate("/Player", {state : {movie}});
   }
+
+  // console.log("Movies & shows ",movies);
     
    return (
     <div className="container mx-auto px-4 py-8">
@@ -217,6 +89,7 @@ function Data({movies,loading,displayQuery}) {
                           📅 {movie.release_date.split("-")[0]}
                         </p>
                       }
+                      <p className="mt-2 text-gray-400 text-sm">Type : { movie.media_type === "tv" ? "Tv Show" : "Movie"}</p>
 
                       <button 
                         onClick={(e) => {

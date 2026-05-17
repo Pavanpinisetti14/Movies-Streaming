@@ -1,15 +1,23 @@
 //more video players https://vidsrcme.ru/api/
 
 export const fetchMovies = {
+    //GEtting movie Detaisl using IMDB ID
     byQuery: ({ query, year }) => fetchMoviesByQuery({ query, year }),
+    //Getting Latest movies using IMDB
     latestMovies: () => fetchLatestMovies(),
+    //Suggested Movies 
     suggestedMovies: ({ id }) => fetchSuggestedMovies({ id }),
+    //Getting IMB Id using IMDB Id
+    getImdbIdFromTmdb: ({ tmdbId, type }) => fetchImdbIdFromTmdb({ tmdbId, type }),
+
+
     getTopRated: () => fetchTopRated(),
     getNowPlaying: () => fetchNowPlaying(),
     getPopularMovies: () => fetchPopularMovies(),
     getTrending: () => fetchTrending(),
     getPopularTV: () => fetchPopularTV(), 
-    getImdbIdFromTmdb: ({ tmdbId }) => fetchImdbIdFromTmdb({ tmdbId }),
+    getTrendingTvShows: () => fetchTrendingTvShows(),
+    
 }
 
 async function fetchLatestMovies() {
@@ -24,8 +32,9 @@ async function fetchLatestMovies() {
 async function fetchMoviesByQuery({ query, year }) {
     const moviesData1 = await fetchMoviesByNameOne({ query, year });
     const moviesData2 = await fetchMovieByNameTwo({ query });
+    const tvShowData = await fetchTvShowByName({query,year})
 
-    let mergedData = [...moviesData1, ...moviesData2];
+    let mergedData = [...moviesData1, ...moviesData2,...tvShowData];
 
     // If year is provided, filter both results by release year
     if (year && year.trim()) {
@@ -45,7 +54,8 @@ async function fetchMoviesByQuery({ query, year }) {
     const uniqueMovies = Array.from(
         new Map(mergedData.map(movie => [movie.id, movie])).values()
     );
-    return uniqueMovies;
+    let shuffledData = uniqueMovies.sort(() => Math.random() - 0.5);
+    return shuffledData;
 }
 
 // First API – TMDb (supports year directly)
@@ -158,18 +168,52 @@ async function fetchPopularTV() {
 }
 
 // New function to get the IMDB ID from a TMDb ID
-async function fetchImdbIdFromTmdb({ tmdbId }) {
+async function fetchImdbIdFromTmdb({ tmdbId, type }) {
     try {
         // Call the TMDb API to get external IDs for the movie
         const response = await fetch(
-            `https://api.themoviedb.org/3/movie/${tmdbId}/external_ids?api_key=e14969396fc4891ca7b01a372713c8d6`
+            `https://api.themoviedb.org/3/${type}/${tmdbId}/external_ids?api_key=e14969396fc4891ca7b01a372713c8d6`
         );
         const data = await response.json();
         
         // The response includes an 'imdb_id' field (e.g., "tt1375666")
+        console.log("APi data : ",data.imdb_id);
         return data.imdb_id;
     } catch (error) {
         console.log("Error fetching IMDB ID:", error);
         return null;
+    }
+}
+
+//Trending TV Shows
+async function fetchTrendingTvShows(){
+
+
+    try {
+
+        const response = await fetch(`https://api.themoviedb.org/3/trending/tv/day?api_key=e14969396fc4891ca7b01a372713c8d6`);
+        const data = await response.json();
+
+        return data.results || [];
+        
+    } catch (error) {
+        console.log("Error in Trendin TV Shows : ",error);
+        return [];
+    }
+}
+
+async function fetchTvShowByName(){
+    try {
+        let url = `https://api.themoviedb.org/3/search/tv?api_key=e14969396fc4891ca7b01a372713c8d6&query=${encodeURIComponent(query)}`;
+        if (year && year.trim()) {
+            url += `&primary_release_year=${year}`;
+        }
+        const response = await fetch(url);
+        const data = await response.json();
+        return data.results || [];
+
+    } catch (error) {
+        console.log("Error in fetching TV Shows : ",error);
+        return [];
     }
 }

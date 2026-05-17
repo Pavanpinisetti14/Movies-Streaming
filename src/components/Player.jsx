@@ -6,6 +6,8 @@ import { fetchMovies } from "../api";
 function Player() {
     const loc = useLocation();
     const movies = loc.state;
+    const type = loc.type;
+    console.log("Type : ",movies.movie.media_type);
     const navigate = useNavigate();
 
     const [suggestedMovies, setSuggestedMovies] = useState([]);
@@ -19,9 +21,9 @@ function Player() {
 
     useEffect(() => {
         const fetchId = async () => {
-            const id = await fetchMovies.getImdbIdFromTmdb({ tmdbId: movies.movie.id });
+            const id = await fetchMovies.getImdbIdFromTmdb({ tmdbId: movies.movie.id,type: "movie" });
             setImdbId(id);
-            console.log("IMDB ID : ",imdbId)
+            // console.log("IMDB ID : ",imdbId)
         };
         fetchId();
     }, [movies.movie.id]);
@@ -83,18 +85,18 @@ function Player() {
     const getServerUrl = () => {
         const movieId = movies.movie.id;
         switch (activeServer) {
-            case "serverOne":
+            case "serverOne": // VidKing
                 return `https://www.vidking.net/embed/movie/${movieId}`;
-            case "serverTwo":
+            case "serverTwo": // VidSrc (vidsrc-embed.ru)
+                return `https://vidsrc-embed.ru/embed/movie/${movieId}`;
+            case "serverThree": // PrimeSrc
                 return `https://primesrc.me/embed/movie?tmdb=${movieId}`;
-            case "serverThree":
-                // const imdbId = await fetchMovies.getImdbIdFromTmdb(movies.movie.id); // You'll need this function
-                return `https://vsembed.ru/embed/movie/${imdbId}`;
-            default:
-                return `https://www.vidking.net/embed/movie/${movieId}`;
+            case "serverFour": // Optional (e.g., vidsrc.xyz using IMDb)
+                return imdbId ? `https://vidsrc-embed.ru/embed/movie/${imdbId}` : "";
+            // ... rest of your servers
         }
     };
-    console.log("Movies ID : ",movies.movie.id);
+    // console.log("Movies ID : ",movies.movie.id);
     return (
         <>
             <nav className="sticky top-0 z-50 bg-[#0A0C10]/95 backdrop-blur-md border-b border-[#2A2F36] px-4 py-4">
@@ -167,7 +169,7 @@ function Player() {
                                 )}
                             </div>
 
-                            {/* Three Server Selection Buttons */}
+                            {/* Four Server Selection Buttons */}
                             <div className="flex flex-wrap justify-center gap-3">
                                 <button
                                     className={`px-4 py-2 rounded-lg font-semibold transition-colors ${
@@ -198,6 +200,16 @@ function Player() {
                                     onClick={() => switchServer("serverThree")}
                                 >
                                     Server 3
+                                </button>
+                                <button
+                                    className={`px-4 py-2 rounded-lg font-semibold transition-colors ${
+                                        activeServer === "serverFour"
+                                            ? "bg-red-700 text-white"
+                                            : "bg-[#2A2F36] text-gray-300 hover:bg-red-600"
+                                    }`}
+                                    onClick={() => switchServer("serverFour")}
+                                >
+                                    Server 4
                                 </button>
                             </div>
 
